@@ -41,10 +41,14 @@ export const ActionTrackerView: React.FC<ActionTrackerViewProps> = ({
   const [notes, setNotes] = useState<string>('');
 
   const filteredActions = actions.filter(item => {
+    const actionText = item.action || item.title || '';
+    const issueText = item.relatedIssue || '';
+    const ownerText = item.owner || '';
+
     const matchesSearch =
-      item.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.relatedIssue.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.owner.toLowerCase().includes(searchTerm.toLowerCase());
+      actionText.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      issueText.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ownerText.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
     const matchesPriority = priorityFilter === 'all' || item.priority === priorityFilter;
@@ -56,15 +60,21 @@ export const ActionTrackerView: React.FC<ActionTrackerViewProps> = ({
     e.preventDefault();
     if (!actionTitle.trim() || !owner.trim()) return;
 
+    const due = dueDateTime || new Date(Date.now() + 86400000).toISOString().slice(0, 16).replace('T', ' ');
+
     const newAction: ActionItem = {
       id: `act-${Date.now()}`,
+      handoverId: 'general-actions',
+      title: actionTitle.trim(),
       action: actionTitle.trim(),
       relatedIssue: relatedIssue.trim() || 'General Operations',
       priority,
       owner: owner.trim(),
-      dueDateTime: dueDateTime || new Date(Date.now() + 86400000).toISOString().slice(0, 16).replace('T', ' '),
+      dueTime: due.includes(' ') ? due.split(' ')[1] : due,
+      dueDateTime: due,
       status: 'Not Started',
       notes: notes.trim(),
+      createdBy: 'Operations Lead',
       isAiRecommended: false,
       approvedByLead: true,
       createdAt: new Date().toISOString(),

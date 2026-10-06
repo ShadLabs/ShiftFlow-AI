@@ -9,12 +9,16 @@ import {
   Info,
   Layers,
   X,
+  ShieldAlert,
+  Clock,
+  BrainCircuit,
 } from 'lucide-react';
 
 interface SidebarProps {
   currentTab: string;
   setCurrentTab: (tab: string) => void;
   pendingActionsCount: number;
+  openIssuesCount?: number;
   openAboutModal: () => void;
   isMobileOpen: boolean;
   setIsMobileOpen: (open: boolean) => void;
@@ -24,12 +28,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
   currentTab,
   setCurrentTab,
   pendingActionsCount,
+  openIssuesCount = 0,
   openAboutModal,
   isMobileOpen,
   setIsMobileOpen,
 }) => {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    {
+      id: 'inbox',
+      label: 'Operations Inbox',
+      icon: ShieldAlert,
+      badge: openIssuesCount > 0 ? openIssuesCount : undefined,
+      alertBadge: true,
+    },
+    { id: 'timeline', label: 'Shift Timeline', icon: Clock },
     { id: 'new-handover', label: 'New Handover', icon: FilePlus2, highlight: true },
     { id: 'handovers', label: 'Handovers', icon: ClipboardList },
     {
@@ -38,7 +51,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: CheckSquare,
       badge: pendingActionsCount > 0 ? pendingActionsCount : undefined,
     },
-    { id: 'insights', label: 'AI Insights', icon: Sparkles },
+    { id: 'insights', label: 'Operational Intelligence', icon: BrainCircuit },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
@@ -113,7 +126,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <span>{item.label}</span>
                 </div>
                 {item.badge !== undefined && (
-                  <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-slate-700 text-slate-200 rounded-md">
+                  <span
+                    className={`px-1.5 py-0.5 text-[10px] font-semibold rounded-md ${
+                      item.alertBadge
+                        ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                        : 'bg-slate-700 text-slate-200'
+                    }`}
+                  >
                     {item.badge}
                   </span>
                 )}

@@ -116,24 +116,56 @@ function runClientAnalysis(payload: AnalyzePayload) {
     notes.includes('diverter') ||
     notes.includes('conveyor')
   ) {
-    const stationMatch = payload.rawNotes.match(/station\s*\d+/i);
+    const stationMatch = payload.rawNotes.match(/(conveyor\s*\d+|station\s*\d+|pack\s*line\s*\d+|wrapper\s*\d+)/i);
     const stationName = stationMatch ? stationMatch[0] : 'Operational Equipment';
-    const isHigh = notes.includes('critical') || notes.includes('halt') || notes.includes('downtime');
+    const isRecurring = notes.includes('recurring') || notes.includes('again') || notes.includes('repeated');
+    const isHigh = notes.includes('critical') || notes.includes('halt') || notes.includes('downtime') || isRecurring;
+
+    // Extract downtime if stated (e.g. "35 minutes" or "lost about 35")
+    const dtMatch = payload.rawNotes.match(/(\d+)\s*(min|minutes)/i);
+    const downtimeMinutes = dtMatch ? parseInt(dtMatch[1], 10) : undefined;
+
+    // Extract backlog impact (e.g. "backlog is 420" or "backlog increased to 420")
+    const backlogMatch = payload.rawNotes.match(/backlog\s*(is|increased to|surged to|reached)?\s*(\d+)/i);
+    const impactStr = backlogMatch
+      ? `Packing backlog increased to ${backlogMatch[2]} units`
+      : downtimeMinutes
+      ? `Lost ${downtimeMinutes} minutes production capacity`
+      : 'Staging line buffer elevated';
+
+    // Extract contact person (e.g. "Sarah from maintenance")
+    const contactMatch = payload.rawNotes.match(/([A-Z][a-z]+)\s+from\s+([a-z]+)/i);
+    const contactName = contactMatch ? contactMatch[1] : undefined;
+
+    // Extract time (e.g. "around 2:30" or "at 14:15")
+    const timeMatch = payload.rawNotes.match(/(\d{1,2}:\d{2})/);
+    const timeObserved = timeMatch ? timeMatch[1] : 'Mid-shift';
 
     issues.push({
-      title: `${stationName} Operational Disruption`,
+      title: `${stationName} ${isRecurring ? 'recurring stoppage' : 'operational disruption'}`,
       category: 'Equipment',
       severity: isHigh ? 'High' : 'Medium',
-      description: payload.rawNotes.slice(0, 180) + '...',
-      area: payload.department || 'Main Production Floor',
-      timeObserved: 'Mid-shift observation',
-      actionTaken: notes.includes('maintenance')
+      description: payload.rawNotes.slice(0, 220),
+      area: stationName || payload.department || 'Main Production Floor',
+      timeObserved,
+      downtimeMinutes,
+      operationalImpact: impactStr,
+      actionTaken: notes.includes('reset')
+        ? 'Maintenance reset conveyor and verified sensor clearance.'
+        : notes.includes('maintenance')
         ? 'Maintenance dispatch completed and local containment applied.'
         : 'Local lead inspection and area safety walk performed.',
-      status: notes.includes('resolved') ? 'Resolved' : 'Monitoring',
-      recommendedAction: 'Verify operating speed and sensor calibration during shift kickoff.',
-      owner: payload.shiftLead || 'Shift Lead',
+      status: notes.includes('inspect') || isRecurring ? 'Monitoring' : notes.includes('resolved') ? 'Resolved' : 'Open',
+      recommendedAction: notes.includes('inspect')
+        ? `Inspect ${stationName.toLowerCase()} motor and solenoid during incoming shift.`
+        : 'Verify operating speed and sensor calibration during shift kickoff.',
+      owner: contactMatch ? 'Maintenance' : (payload.shiftLead || 'Shift Lead'),
+      contactPerson: contactName,
     });
+
+    if (notes.includes('inspect')) {
+      nextShiftPriorities.push(`Inspect ${stationName} motor and drive mechanism.`);
+    }
   }
 
   // Queue / Backlog

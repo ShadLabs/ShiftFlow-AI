@@ -559,6 +559,63 @@ ShiftFlow AI Operations Handover System
             </div>
           </div>
 
+          {/* 9. FORMAL CHAIN OF CUSTODY & ACKNOWLEDGMENT AUDIT LOG */}
+          {((Array.isArray(handover.acknowledgments) && handover.acknowledgments.length > 0) || handover.acknowledgment) && (
+            <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-900">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span>Chain of Custody & Shift Transfer Log</span>
+                </div>
+                <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-md">
+                  {Array.isArray(handover.acknowledgments) ? handover.acknowledgments.length : 1} Sign-off Event{((Array.isArray(handover.acknowledgments) ? handover.acknowledgments.length : 1) > 1 ? 's' : '')}
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                {(Array.isArray(handover.acknowledgments) && handover.acknowledgments.length > 0
+                  ? handover.acknowledgments
+                  : handover.acknowledgment
+                  ? [handover.acknowledgment]
+                  : []
+                ).map((ack, idx) => (
+                  <div
+                    key={ack.id || idx}
+                    className="p-3 rounded-lg bg-white border border-emerald-100 text-xs shadow-xs space-y-1"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="font-semibold text-slate-900 flex items-center gap-1.5">
+                        <span className="text-emerald-600 font-bold">✓</span>
+                        <span>Accepted by <strong>{ack.acknowledgedBy}</strong></span>
+                        <span className="text-slate-400 font-normal">({ack.acknowledgedShiftId})</span>
+                      </div>
+                      <span className="text-[11px] text-slate-500 font-mono">
+                        {new Date(ack.acknowledgedAt).toLocaleString([], {
+                          dateStyle: 'short',
+                          timeStyle: 'short',
+                        })}
+                      </span>
+                    </div>
+                    {ack.notes && (
+                      <p className="text-[11px] text-slate-600 italic bg-slate-50 p-2 rounded-md border border-slate-100">
+                        &ldquo;{ack.notes}&rdquo;
+                      </p>
+                    )}
+                    <div className="text-[10px] text-slate-400 flex items-center gap-3 pt-0.5">
+                      <span>Version: v{ack.handoverVersion || 1}</span>
+                      {ack.inheritedIssueCount !== undefined && (
+                        <span>· Inherited Issues: {ack.inheritedIssueCount}</span>
+                      )}
+                      {ack.inheritedActionCount !== undefined && (
+                        <span>· Scheduled Actions: {ack.inheritedActionCount}</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Verification / Signature Section for Print Layout */}
           <div className="pt-6 border-t-2 border-slate-200 grid grid-cols-2 gap-8 text-xs text-slate-600">
             <div>
