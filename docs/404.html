@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ShiftFlow AI - Operations Shift Handover Assistant</title>
+    <meta name="description" content="AI-powered Operations Shift Handover Assistant transforming unstructured shift notes into clear, professional, actionable shift handovers, continuity tracking, and operational intelligence." />
+    <meta property="og:title" content="ShiftFlow AI - Operations Shift Handover Assistant" />
+    <meta property="og:description" content="AI-powered Operations Shift Handover Assistant transforming unstructured shift notes into clear, professional, actionable shift handovers, continuity tracking, and operational intelligence." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script type="module" crossorigin src="./assets/index.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index.css">
+  </head>
+  <body class="bg-slate-50 text-slate-900 antialiased selection:bg-slate-200">
+    <div id="root"></div>
+    <script>
+      // Automatically load compiled production bundle if served on GitHub Pages root
+      if (window.location.hostname.endsWith('github.io') && !document.querySelector('script[src*="assets/index.js"]')) {
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = './assets/index.css';
+        document.head.appendChild(link);
+
+        var script = document.createElement('script');
+        script.type = 'module';
+        script.src = './assets/index.js';
+        document.body.appendChild(script);
+      }
+    </script>
+  </body>
+</html>
+
